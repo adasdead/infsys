@@ -1,8 +1,11 @@
 #include "cpu/cpuinfo.h"
-
+#include "cpu/cpucache.h"
 #include "cpu/cpuid.h"
 
 #define TEMP_START_SIZE                             250
+
+#define BIT_TEST(num, n) (((num) >> (n)) & 1)
+#define BITS_TO_STR(num) (cstring_t) (&num)
 
 void cpuinfo_identify()
 {
@@ -70,7 +73,7 @@ void cpuinfo_identify()
 
     cpuinfo.threads = (regs.ebx >> 16) & 0xFF;
 
-    if (cpuinfo_is_intel())
+    if (IS_INTEL())
     {
         cpuid(0x4, 0, &regs);
 
@@ -90,12 +93,12 @@ void cpuinfo_identify()
 
     cpuinfo.features[F_FSGSBASE] = BIT_TEST(regs.ebx, 0);
     cpuinfo.features[F_BMI1] = BIT_TEST(regs.ebx, 3);
-    cpuinfo.features[F_HLE] = cpuinfo_is_intel() && BIT_TEST(regs.ebx, 4);
+    cpuinfo.features[F_HLE] = IS_INTEL() && BIT_TEST(regs.ebx, 4);
     cpuinfo.features[F_AVX2] = BIT_TEST(regs.ebx, 5);
     cpuinfo.features[F_BMI2] = BIT_TEST(regs.ebx, 8);
     cpuinfo.features[F_ERMS] = BIT_TEST(regs.ebx, 9);
     cpuinfo.features[F_INVPCID] = BIT_TEST(regs.ebx, 10);
-    cpuinfo.features[F_RTM] = cpuinfo_is_intel() && BIT_TEST(regs.ebx, 11);
+    cpuinfo.features[F_RTM] = IS_INTEL() && BIT_TEST(regs.ebx, 11);
     cpuinfo.features[F_RDSEED] = BIT_TEST(regs.ebx, 18);
     cpuinfo.features[F_ADX] = BIT_TEST(regs.ebx, 19);
     cpuinfo.features[F_SHA] = BIT_TEST(regs.ebx, 29);
@@ -103,17 +106,17 @@ void cpuinfo_identify()
     cpuid(0x80000001, 0, &regs);
 
     cpuinfo.features[F_LAHF] = BIT_TEST(regs.ecx, 0);
-    cpuinfo.features[F_LZCNT] = cpuinfo_is_intel() && BIT_TEST(regs.ecx, 5);
-    cpuinfo.features[F_ABM] = !cpuinfo_is_intel() && BIT_TEST(regs.ecx, 5);
-    cpuinfo.features[F_SSE4a] = !cpuinfo_is_intel() && BIT_TEST(regs.ecx, 6);
-    cpuinfo.features[F_XOP] = !cpuinfo_is_intel() && BIT_TEST(regs.ecx, 11);
-    cpuinfo.features[F_TBM] = !cpuinfo_is_intel() && BIT_TEST(regs.ecx, 21);
+    cpuinfo.features[F_LZCNT] = IS_INTEL() && BIT_TEST(regs.ecx, 5);
+    cpuinfo.features[F_ABM] = !IS_INTEL() && BIT_TEST(regs.ecx, 5);
+    cpuinfo.features[F_SSE4a] = !IS_INTEL() && BIT_TEST(regs.ecx, 6);
+    cpuinfo.features[F_XOP] = !IS_INTEL() && BIT_TEST(regs.ecx, 11);
+    cpuinfo.features[F_TBM] = !IS_INTEL() && BIT_TEST(regs.ecx, 21);
 
-    cpuinfo.features[F_TBM] = cpuinfo_is_intel() && BIT_TEST(regs.edx, 11);
-    cpuinfo.features[F_MMXEXT] = !cpuinfo_is_intel() && BIT_TEST(regs.edx, 22);
-    cpuinfo.features[F_RDTSCP] = cpuinfo_is_intel() && BIT_TEST(regs.edx, 27);
-    cpuinfo.features[F_3DNOWEXT] = !cpuinfo_is_intel() && BIT_TEST(regs.edx, 30);
-    cpuinfo.features[F_3DNOW] = !cpuinfo_is_intel() && BIT_TEST(regs.edx, 31);
+    cpuinfo.features[F_TBM] = IS_INTEL() && BIT_TEST(regs.edx, 11);
+    cpuinfo.features[F_MMXEXT] = !IS_INTEL() && BIT_TEST(regs.edx, 22);
+    cpuinfo.features[F_RDTSCP] = IS_INTEL() && BIT_TEST(regs.edx, 27);
+    cpuinfo.features[F_3DNOWEXT] = !IS_INTEL() && BIT_TEST(regs.edx, 30);
+    cpuinfo.features[F_3DNOW] = !IS_INTEL() && BIT_TEST(regs.edx, 31);
 
     size_t offset = 0;
 
@@ -128,6 +131,8 @@ void cpuinfo_identify()
 
         offset += 16;
     }
+
+    cpucache_update(cpuinfo.caches);
 }
 
 void cpuinfo_features_str(string_t dest, size_t size)

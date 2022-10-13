@@ -1,38 +1,15 @@
 #include "infsys.h"
 
+#include "windows/winapi.h"
+
 #include "cpu/cpuinfo.h"
 #include "cpu/cpucache.h"
 
+#include "definitions.h"
+
 #include "gui.h"
 
-#define WINDOW_NAME                  "InfSyS v1.0"
-#define WINDOW_WIDTH                 500
-#define WINDOW_HEIGHT                500
-
-int on_program_init(void);
-
-#if 0
-
-#include "windows/winapi.h"
-
-int WINAPI WinMain(HINSTANCE hInstance,
-                   HINSTANCE hPrevInstance,
-                   LPSTR lpCmdLine,
-                   int nCmdShow)
-{
-    __w32_hinstance = hInstance;
-#else
-int main(void)
-{
-#endif
-    cpuinfo_identify();
-
-    gui_init(on_program_init);
-    
-    return EXIT_SUCCESS;
-}
-
-int on_program_init(void)
+static int application_init(void)
 {
     window_t win = new_window(WINDOW_NAME, (pos_t) {
         WINDOW_WIDTH, WINDOW_HEIGHT
@@ -59,4 +36,30 @@ int on_program_init(void)
     window_open(win);
 
     return GUI_INIT_SUCCESS;
+}
+
+#if 0
+int WINAPI WinMain(HINSTANCE hInstance,
+                   HINSTANCE hPrevInstance,
+                   LPSTR lpCmdLine,
+                   int nCmdShow)
+{
+    __w32_hinstance = hInstance;
+#else
+int main(void)
+{
+#endif
+    cpuinfo_identify();
+
+    for (int i = 0; i < 4; i++)
+    {
+        printf("%d %d\n",
+            cpuinfo.caches[i].size / SIZE_KB,
+            cpuinfo.caches[i].ways
+        );
+    }
+
+    gui_init(application_init);
+
+    return EXIT_SUCCESS;
 }

@@ -9,9 +9,6 @@
 #   include <cpuid.h>
 #endif
 
-#define BIT_TEST(num, n) (((num) >> (n)) & 1)
-#define BITS_TO_STR(num) (const char*) (&num)
-
 typedef struct
 {
     uint32_t eax, ebx, ecx, edx;

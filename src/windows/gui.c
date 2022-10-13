@@ -5,6 +5,8 @@
 #define WINDOW_NAME_BUF_SIZE            128
 #define WINDOW_MAX_WIDGETS              64
 
+#define WINDOW_CLZ_BUFFER_SZ            128
+
 #define LABEL_BUF_SIZE                  256
 #define TXTBOX_BUF_SIZE                 256
 
@@ -36,6 +38,20 @@ struct _txtbox_t
     pos_t size, pos;
     HWND hwnd;
 };
+
+static void __register_class(WNDPROC proc, cstring_t name)
+{
+    WNDCLASS wc = {0};
+
+    wchar_t buffer[WINDOW_CLZ_BUFFER_SZ];
+    w32_ascii_to_wide(buffer, name, WINDOW_CLZ_BUFFER_SZ);
+
+    wc.lpfnWndProc   = proc;
+    wc.hInstance     = __w32_hinstance;
+    wc.lpszClassName = buffer;
+
+    RegisterClass(&wc);
+}
 
 static HWND __widget_to_HWND(widget_t *widget)
 {
@@ -106,7 +122,7 @@ static LRESULT CALLBACK __window_proc(HWND hwnd, UINT uMsg,
 
 void gui_init(int (*init_fn)())
 {
-    w32_register_class(__window_proc, "_WinProc_");
+    __register_class(__window_proc, "_WinProc_");
 
     if (init_fn() < 0) return;
 
