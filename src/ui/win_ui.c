@@ -1,95 +1,79 @@
-#include "gui.h"
+#warning WINDOWS NOT SUPPORTED
 
-#include "windows/winapi.h"
+#if 0
 
-#define WINDOW_NAME_BUF_SIZE            128
-#define WINDOW_MAX_WIDGETS              64
+#include "ui/ui.h"
 
-#define WINDOW_CLZ_BUFFER_SZ            128
+#ifndef UNICODE
+#define UNICODE
+#endif /* UNICODE */
 
-#define LABEL_BUF_SIZE                  256
-#define TXTBOX_BUF_SIZE                 256
+#include <windows.h>
 
-static size_t                           __created_windows = 0;
+#define WINDOW_NAME_BUF_SIZE    128
+#define WINDOW_MAX_WIDGETS      64
 
-struct _window_t
+#define CLASS_NAME              L"__WinProc__"
+
+#define WIDGET_NAME_BUF_SIZE    256
+
+#define ascii_to_wide(dest, src, size)          \
+    MultiByteToWideChar(CP_UTF8, 0, src, -1,    \
+                        dest, (int) size)
+
+#define get_instance() GetModuleHandle(NULL);
+
+typedef wchar_t *wstring;
+
+static size_t created_windows = 0;
+
+struct ui_window
 {
-    widget_t widget, *widgets[WINDOW_MAX_WIDGETS];
-    void (*close_fn)(window_t);
+    HWND hwnd;
+
+    HWND wigdets[WINDOW_MAX_WIDGETS];
+
+    ui_close_fn close_fn;
+
     size_t widgets_count;
-    pos_t size;
-    HWND hwnd;
+
+    uint32_t height;
+    uint32_t width;
 };
 
-struct _label_t
-{
-    widget_t widget;
-    window_t parent;
-    wchar_t value[LABEL_BUF_SIZE];
-    pos_t size, pos;
-    HWND hwnd;
-};
-
-struct _txtbox_t
-{
-    widget_t widget;
-    window_t parent;
-    wchar_t value[TXTBOX_BUF_SIZE];
-    pos_t size, pos;
-    HWND hwnd;
-};
-
-static void __register_class(WNDPROC proc, cstring_t name)
+static void register_class(WNDPROC proc, wstring name)
 {
     WNDCLASS wc = {0};
 
-    wchar_t buffer[WINDOW_CLZ_BUFFER_SZ];
-    w32_ascii_to_wide(buffer, name, WINDOW_CLZ_BUFFER_SZ);
-
     wc.lpfnWndProc   = proc;
-    wc.hInstance     = __w32_hinstance;
-    wc.lpszClassName = buffer;
+    wc.hInstance     = get_instance();
+    wc.lpszClassName = name;
 
     RegisterClass(&wc);
 }
 
-static HWND __widget_to_HWND(widget_t *widget)
-{
-    switch (widget->type)
-    {
-    case W_WINDOW:
-        return ((window_t) widget->self)->hwnd;
-    case W_LABEL:
-        return ((label_t) widget->self)->hwnd;
-    case W_TXTBOX:
-        return ((txtbox_t) widget->self)->hwnd;
-    }
-
-    return NULL;
-}
-
-static void __fix_fonts(widget_t *widget)
+static void fix_fonts(HWND *window)
 {
     WPARAM font = (WPARAM) GetStockObject(DEFAULT_GUI_FONT);
-    SendMessage(__widget_to_HWND(widget), WM_SETFONT, font, TRUE);
+    SendMessage(window, WM_SETFONT, font, TRUE);
 }
 
-static LRESULT CALLBACK __window_proc(HWND hwnd, UINT uMsg,
-                                      WPARAM wParam, LPARAM lParam)
+static LRESULT CALLBACK window_proc(HWND hwnd, UINT uMsg,
+                                    WPARAM wParam, LPARAM lParam)
 {
-    window_t window;
+    struct ui_window *window;
 
     if (uMsg == WM_NCCREATE)
     {
         CREATESTRUCT* pCreate = (CREATESTRUCT*) lParam;
-        window = (window_t) pCreate->lpCreateParams;
+        window = (struct ui_window*) pCreate->lpCreateParams;
         SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)window);
 
         window->hwnd = hwnd;
     }
     else
     {
-        window = (window_t) GetWindowLongPtr(hwnd, GWLP_USERDATA);
+        window = (struct ui_window*) GetWindowLongPtr(hwnd, GWLP_USERDATA);
     }
 
     switch (uMsg)
@@ -103,7 +87,7 @@ static LRESULT CALLBACK __window_proc(HWND hwnd, UINT uMsg,
 
         if (!(--__created_windows))
             PostQuitMessage(0);
-        
+
         return 0;
 
     case WM_PAINT:
@@ -122,7 +106,7 @@ static LRESULT CALLBACK __window_proc(HWND hwnd, UINT uMsg,
 
 void gui_init(int (*init_fn)())
 {
-    __register_class(__window_proc, "_WinProc_");
+    register_class(window_proc, CLASS_NAME);
 
     if (init_fn() < 0) return;
 
@@ -132,25 +116,6 @@ void gui_init(int (*init_fn)())
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
-}
-
-widget_t* gui_to_widget(void *widget)
-{
-    struct
-    {
-        widget_t widget;
-
-    } *data = widget;
-
-    return &(data->widget);    
-}
-
-void __gui_free(widget_t *widget)
-{
-    if (!widget) return;
-
-    DestroyWindow(__widget_to_HWND(widget));
-    free(widget->self);
 }
 
 // Window
@@ -202,7 +167,7 @@ void window_attach(window_t win, void *widget_p)
         );
 
         break;
-    
+
     case W_TXTBOX:
         txtbox_t box = widget->self;
 
@@ -237,32 +202,4 @@ void window_open(window_t win)
     ShowWindow(win->hwnd, 1);
 }
 
-// Label
-
-label_t new_label(cstring_t text, pos_t pos, pos_t size)
-{
-    label_t lbl_ptr = malloc(sizeof(struct _label_t));
-    
-    w32_ascii_to_wide(lbl_ptr->value, text, LABEL_BUF_SIZE);
-    
-    lbl_ptr->widget = (widget_t) { W_LABEL, lbl_ptr };
-    lbl_ptr->size = size;
-    lbl_ptr->pos = pos;
-
-    return lbl_ptr;
-}
-
-// Text Box
-
-txtbox_t new_textbox(cstring_t text, pos_t pos, pos_t size)
-{
-    txtbox_t box_ptr = malloc(sizeof(struct _txtbox_t));
-    
-    w32_ascii_to_wide(box_ptr->value, text, LABEL_BUF_SIZE);
-    
-    box_ptr->widget = (widget_t) { W_TXTBOX, box_ptr };
-    box_ptr->size = size;
-    box_ptr->pos = pos;
-
-    return box_ptr;
-}
+#endif /* _WIN32 */

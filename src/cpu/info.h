@@ -1,15 +1,12 @@
-#ifndef _CPU_CPUINFO_H
-#define _CPU_CPUINFO_H
+#ifndef CPU_INFO_H
+#define CPU_INFO_H
 
 #include "infsys.h"
 
-#include "cpu/cpucache.h"
+#include "cpu/cache.h"
 
-#define CPU_NAME_LEN            64 + 1
-#define CPU_VENDOR_LEN          12 + 1
-
-#define IS_INTEL() \
-    (strstr(cpuinfo.vendor, "Intel") != NULL)
+#define CPU_INFO_NAME_LEN    64 + 1
+#define CPU_INFO_VENDOR_LEN  12 + 1
 
 enum cpu_features
 {
@@ -24,22 +21,25 @@ enum cpu_features
     F_SSSE3, F_SYSCALL, F_TBM, F_XOP, F_XSAVE, F_TOTAL
 };
 
-struct
+struct cpu_info
 {
-    char name[CPU_NAME_LEN], vendor[CPU_VENDOR_LEN];
+    char name[CPU_INFO_NAME_LEN];
+    char vendor[CPU_INFO_VENDOR_LEN];
 
-    cacheset_t caches;
+    struct cpu_cache caches[4];
 
     size_t cores, threads;
     size_t stepping, family, model;
     size_t ext_family, ext_model;
 
-    bool_t features[F_TOTAL];
+    bool features[F_TOTAL];
 
-} cpuinfo;
+    bool is_intel;
+};
 
-void cpuinfo_identify();
+void cpu_identify(struct cpu_info *info);
 
-void cpuinfo_features_str(string_t dest, size_t size);
+void cpu_features_str(const struct cpu_info *info,
+                      string dest, size_t size);
 
-#endif // _CPU_CPUINFO_H
+#endif /* CPU_INFO_H */

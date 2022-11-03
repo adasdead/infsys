@@ -1,5 +1,5 @@
-#ifndef _CPU_CPUID_H
-#define _CPU_CPUID_H
+#ifndef CPU_CPUID_H
+#define CPU_CPUID_H
 
 #include "infsys.h"
 
@@ -7,23 +7,22 @@
 #   include <intrin.h>
 #else
 #   include <cpuid.h>
-#endif
+#endif /* _WIN32 */
 
-typedef struct
+struct registers32
 {
     uint32_t eax, ebx, ecx, edx;
-
-} registers32_t;
+};
 
 static void cpuid(uint32_t lvl, uint32_t cnt,
-                  registers32_t *regs)
+                  struct registers32 *regs)
 {
 #if _WIN32
     __cpuidex((int*) regs, lvl, cnt);
 #else
     __cpuid_count(lvl, cnt, regs->eax, regs->ebx,
                             regs->ecx, regs->edx);
-#endif
+#endif /* _WIN32 */
 }
 
-#endif // _CPU_CPUID_H
+#endif /* CPU_CPUID_H */

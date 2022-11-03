@@ -1,13 +1,18 @@
-#ifndef _INFSYS_H
-#define _INFSYS_H
+#ifndef INFSYS_H
+#define INFSYS_H
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdbool.h>
 
-typedef uint8_t bool_t;
-typedef char* string_t;
-typedef const string_t cstring_t;
+#define WINDOW_NAME   "InfSyS v1.0"
+#define WINDOW_WIDTH  500
+#define WINDOW_HEIGHT 500
 
-#endif // _INFSYS_H
+#define SIZE_KB       1024
+
+typedef char *string;
+
+#endif /* INFSYS_H */
