@@ -1,6 +1,4 @@
-#warning WINDOWS NOT SUPPORTED
-
-#if 0
+#if _WIN32
 
 #include "ui/ui.h"
 
@@ -10,82 +8,73 @@
 
 #include <windows.h>
 
-#define WINDOW_NAME_BUF_SIZE    128
-#define WINDOW_MAX_WIDGETS      64
-
 #define CLASS_NAME              L"__WinProc__"
 
-#define WIDGET_NAME_BUF_SIZE    256
+#define WIDGET_TEXT_BUF_SIZE    256
 
-#define ascii_to_wide(dest, src, size)          \
-    MultiByteToWideChar(CP_UTF8, 0, src, -1,    \
-                        dest, (int) size)
+#define WINDOW_NAME_BUF_SIZE    128
+#define WINDOW_STYLES           WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME \
+                                ^ WS_MAXIMIZEBOX
 
-#define get_instance() GetModuleHandle(NULL);
+#define INSTANCE                GetModuleHandle(NULL)
+
+#define ascii_to_wide(dest, src, size)                              \
+    MultiByteToWideChar(CP_UTF8, 0, src, -1, dest, (int) size)
 
 typedef wchar_t *wstring;
-
-static size_t created_windows = 0;
 
 struct ui_window
 {
     HWND hwnd;
-
-    HWND wigdets[WINDOW_MAX_WIDGETS];
-
+    
     ui_close_fn close_fn;
-
-    size_t widgets_count;
-
-    uint32_t height;
-    uint32_t width;
 };
+
+static size_t win_ui_created_windows = 0;
 
 static void register_class(WNDPROC proc, wstring name)
 {
     WNDCLASS wc = {0};
 
     wc.lpfnWndProc   = proc;
-    wc.hInstance     = get_instance();
+    wc.hInstance     = INSTANCE;
     wc.lpszClassName = name;
 
     RegisterClass(&wc);
 }
 
-static void fix_fonts(HWND *window)
+static void fix_fonts(HWND window)
 {
     WPARAM font = (WPARAM) GetStockObject(DEFAULT_GUI_FONT);
-    SendMessage(window, WM_SETFONT, font, TRUE);
+    SendMessage(window, WM_SETFONT, font, 1);
 }
 
-static LRESULT CALLBACK window_proc(HWND hwnd, UINT uMsg,
-                                    WPARAM wParam, LPARAM lParam)
+static LRESULT CALLBACK window_proc(HWND hwnd, UINT message,
+                                    WPARAM w_param, LPARAM l_param)
 {
     struct ui_window *window;
 
-    if (uMsg == WM_NCCREATE)
+    if (message == WM_NCCREATE)
     {
-        CREATESTRUCT* pCreate = (CREATESTRUCT*) lParam;
-        window = (struct ui_window*) pCreate->lpCreateParams;
-        SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)window);
+        CREATESTRUCT* create = (CREATESTRUCT*) l_param;
+        window = (struct ui_window*) create->lpCreateParams;
+        SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR) window);
 
         window->hwnd = hwnd;
     }
     else
     {
-        window = (struct ui_window*) GetWindowLongPtr(hwnd, GWLP_USERDATA);
+        window = (struct ui_window*) GetWindowLongPtr(hwnd,
+                                                      GWLP_USERDATA);
     }
 
-    switch (uMsg)
+    switch (message)
     {
     case WM_DESTROY:
         if (window->close_fn)
             window->close_fn(window);
-
-        for (int i = 0; i < window->widgets_count; i++)
-            GUI_WIDGET_FREE(window->widgets[i]);
-
-        if (!(--__created_windows))
+        
+        if (!(--win_ui_created_windows))
             PostQuitMessage(0);
 
         return 0;
@@ -96,108 +85,87 @@ static LRESULT CALLBACK window_proc(HWND hwnd, UINT uMsg,
         FillRect(hdc, &ps.rcPaint, (HBRUSH) (COLOR_WINDOW));
         EndPaint(hwnd, &ps);
         return 0;
-
     }
 
-    return DefWindowProc(hwnd, uMsg, wParam, lParam);
+    return DefWindowProc(hwnd, message, w_param, l_param);
 }
 
-// GUI
-
-void gui_init(int (*init_fn)())
+int ui_init(ui_init_fn fn)
 {
+    MSG msg = {0};
+
     register_class(window_proc, CLASS_NAME);
 
-    if (init_fn() < 0) return;
+    if (fn() < 0) return 1;
 
-    MSG msg = {0};
     while (GetMessage(&msg, NULL, 0, 0) > 0)
     {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
+
+    return 0;
 }
 
-// Window
-
-window_t new_window(cstring_t name, pos_t size)
+struct ui_window *ui_new_window(const string name, uint32_t width,
+                                uint32_t height)
 {
-    wchar_t name_buf[WINDOW_NAME_BUF_SIZE];
+    struct ui_window *tmp = malloc(sizeof(*tmp));
+    wchar_t buffer[WINDOW_NAME_BUF_SIZE];
 
-    w32_ascii_to_wide(name_buf, name, WINDOW_NAME_BUF_SIZE);
-
-    window_t win_ptr = malloc(sizeof(struct _window_t));
+    ascii_to_wide(buffer, name, WINDOW_NAME_BUF_SIZE);
 
     HWND hwnd = CreateWindowEx(
-        0, L"_WinProc_", name_buf, WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, CW_USEDEFAULT, size.x, size.y,
-        NULL, NULL, __w32_hinstance, win_ptr
+        0, CLASS_NAME, buffer, WINDOW_STYLES,
+        CW_USEDEFAULT, CW_USEDEFAULT, width, height,
+        NULL, NULL, INSTANCE, tmp
     );
 
-    if (hwnd == NULL)
-    {
-        free(win_ptr);
-        return NULL;
-    }
+    tmp->close_fn = NULL;
+    tmp->hwnd = hwnd;
 
-    win_ptr->widget = (widget_t) { W_WINDOW, win_ptr };
-    win_ptr->widgets_count = 0;
-    win_ptr->close_fn = NULL;
-    win_ptr->hwnd = hwnd;
-    win_ptr->size = size;
+    win_ui_created_windows++;
 
-    __created_windows++;
-
-    return win_ptr;
+    return tmp;
 }
 
-void window_attach(window_t win, void *widget_p)
+void ui_window_on_close(struct ui_window *win, ui_close_fn fn)
 {
-    widget_t *widget = (widget_t*) widget_p;
+    win->close_fn = fn;
+}
 
-    switch (widget->type)
+void ui_window_widget(struct ui_window *win, struct ui_widget widget)
+{
+    wchar_t buffer[WIDGET_TEXT_BUF_SIZE];
+    HWND hwnd;
+
+    ascii_to_wide(buffer, widget.text, WIDGET_TEXT_BUF_SIZE);
+
+    switch (widget.type)
     {
-    case W_LABEL:
-        label_t lbl = widget->self;
-
-        lbl->hwnd = CreateWindow(
-            L"static", lbl->value, SS_EDITCONTROL | WS_CHILD | WS_VISIBLE,
-            lbl->pos.x, lbl->pos.y, lbl->size.x, lbl->size.y,
-            win->hwnd, NULL, NULL, NULL
+    case UI_LABEL:
+        hwnd = CreateWindow(
+            L"static", buffer, SS_EDITCONTROL | WS_CHILD | WS_VISIBLE,
+            widget.x, widget.y, widget.width, widget.height, win->hwnd, NULL,
+            NULL, NULL
         );
-
         break;
 
-    case W_TXTBOX:
-        txtbox_t box = widget->self;
-
-        box->hwnd = CreateWindow(
+    case UI_TEXTBOX:
+        hwnd = CreateWindow(
             L"edit", L"", WS_BORDER | WS_CHILD | WS_VISIBLE | ES_READONLY
-            | ES_MULTILINE, box->pos.x, box->pos.y, box->size.x, box->size.y,
+            | ES_MULTILINE, widget.x, widget.y, widget.width, widget.height,
             win->hwnd, NULL, NULL, NULL
         );
 
-        SetWindowTextW(box->hwnd, box->value);
+        SetWindowTextW(hwnd, buffer);
         break;
     }
 
-    win->widgets[win->widgets_count++] = widget;
-
-    __fix_fonts(widget);
+    fix_fonts(hwnd);
 }
 
-void window_on_close(window_t win, void (*close_fn)(window_t))
-{
-    win->close_fn = close_fn;
-}
-
-void window_no_resizable(window_t win)
-{
-    LONG styles = WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME ^ WS_MAXIMIZEBOX;
-    SetWindowLong(win->hwnd, GWL_STYLE, styles);
-}
-
-void window_open(window_t win)
+void ui_window_open(struct ui_window *win)
 {
     ShowWindow(win->hwnd, 1);
 }
