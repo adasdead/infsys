@@ -16,13 +16,27 @@ struct ui_window
 
 static GtkApplication *g_app;
 
+static void ui_resize_font(enum ui_widget_type type,
+                           GtkWidget *widget)
+{
+    PangoFontDescription *desc;
+    desc = pango_font_description_from_string("Monospace 9");
+
+    G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+    gtk_widget_override_font(widget, desc);
+    G_GNUC_END_IGNORE_DEPRECATIONS
+
+    pango_font_description_free(desc);
+}
+
 static int ui_activate(GtkApplication *app, gpointer data)
 {
     return ((ui_init_fn) data)();
 }
 
-gboolean ui_window_deleted(GtkWidget *widget, GdkEvent *event,
-                           gpointer data)
+static gboolean ui_window_deleted(GtkWidget *widget,
+                                  GdkEvent *event,
+                                  gpointer data)
 {
     struct ui_window *win = (struct ui_window*) data;
     if (win->close_fn) win->close_fn(win);
@@ -30,7 +44,6 @@ gboolean ui_window_deleted(GtkWidget *widget, GdkEvent *event,
 
     return 0;
 }
-
 
 int ui_init(ui_init_fn fn)
 {
@@ -92,7 +105,13 @@ void ui_window_widget(struct ui_window *win, struct ui_widget widget)
         gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(tmp), GTK_WRAP_CHAR);
         gtk_text_view_set_editable(GTK_TEXT_VIEW(tmp), 0);
         break;
+
+    case UI_SEPARATOR:
+        tmp = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+        break;
     }
+
+    ui_resize_font(widget.type, tmp);
 
     gtk_widget_set_size_request(tmp, widget.width, widget.height);
     gtk_fixed_put(GTK_FIXED(win->fixed), tmp, widget.x, widget.y);

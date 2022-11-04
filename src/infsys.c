@@ -10,6 +10,8 @@ static int infsys_run(void)
 
     cpu_identify(&cpu);
 
+    str_trimr(cpu.name);
+
     window = ui_new_window(WINDOW_NAME, WINDOW_WIDTH,
                            WINDOW_HEIGHT);
 
