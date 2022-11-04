@@ -6,22 +6,22 @@
 static int infsys_run(void)
 {
     struct ui_window *window;
-    struct cpu_info info;
+    struct cpu_info cpu;
 
-    cpu_identify(&info);
+    cpu_identify(&cpu);
 
     window = ui_new_window(WINDOW_NAME, WINDOW_WIDTH,
                            WINDOW_HEIGHT);
 
     ui_label(window, "Name", 45, 22);
-    ui_textbox(window, info.name, 80, 20, 310, 17);
+    ui_textbox(window, cpu.name, 80, 20, 310, 17);
 
     char family[3]   = {'\0'}, model[3] = {'\0'},
          stepping[3] = {'\0'};
-        
-    sprintf(family, "%01X", (int) info.family);
-    sprintf(stepping, "%01X", (int) info.stepping);
-    sprintf(model, "%01X", (int) info.model);
+    
+    sprintf(family, "%01X", (int) cpu.family);
+    sprintf(stepping, "%01X", (int) cpu.stepping);
+    sprintf(model, "%01X", (int) cpu.model);
 
     ui_label(window, "Family", 44, 42);
     ui_textbox(window, family, 80, 40, 50, 17);
@@ -34,17 +34,19 @@ static int infsys_run(void)
 
     char cores[3] = {'\0'}, threads[3] = {'\0'};
 
-    sprintf(threads, "%d", (int) info.threads);
-    sprintf(cores, "%d", (int) info.cores);
+    sprintf(threads, "%d", (int) cpu.threads);
+    sprintf(cores, "%d", (int) cpu.cores);
 
     ui_textbox(window, cores, 395, 20, 25, 17);
     ui_textbox(window, threads, 425, 20, 25, 17);
 
     char features[512];
-    cpu_features_str(&info, features, 512);
+    cpu_features_str(&cpu, features, 512);
 
     ui_label(window, "Features", 32, 62);
     ui_textbox(window, features, 80, 60, 370, 80);
+
+    ui_separator(window, 35, 150, 418);
 
     ui_window_open(window);
 

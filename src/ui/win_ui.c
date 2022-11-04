@@ -30,7 +30,7 @@ struct ui_window
     ui_close_fn close_fn;
 };
 
-static size_t win_ui_created_windows = 0;
+static size_t created_windows = 0;
 
 static void register_class(WNDPROC proc, wstring name)
 {
@@ -74,7 +74,7 @@ static LRESULT CALLBACK window_proc(HWND hwnd, UINT message,
         if (window->close_fn)
             window->close_fn(window);
         
-        if (!(--win_ui_created_windows))
+        if (!(--created_windows))
             PostQuitMessage(0);
 
         return 0;
@@ -113,7 +113,8 @@ struct ui_window *ui_new_window(const string name, uint32_t width,
     struct ui_window *tmp = malloc(sizeof(*tmp));
     wchar_t buffer[WINDOW_NAME_BUF_SIZE];
 
-    ascii_to_wide(buffer, name, WINDOW_NAME_BUF_SIZE);
+    if (name)
+        ascii_to_wide(buffer, name, WINDOW_NAME_BUF_SIZE);
 
     HWND hwnd = CreateWindowEx(
         0, CLASS_NAME, buffer, WINDOW_STYLES,
@@ -124,7 +125,7 @@ struct ui_window *ui_new_window(const string name, uint32_t width,
     tmp->close_fn = NULL;
     tmp->hwnd = hwnd;
 
-    win_ui_created_windows++;
+    created_windows++;
 
     return tmp;
 }
@@ -159,6 +160,14 @@ void ui_window_widget(struct ui_window *win, struct ui_widget widget)
         );
 
         SetWindowTextW(hwnd, buffer);
+        break;
+    
+    case UI_SEPARATOR:
+        hwnd = CreateWindow(
+            L"static", L"", SS_ETCHEDHORZ | WS_CHILD | WS_VISIBLE,
+            widget.x, widget.y, widget.width, widget.height, win->hwnd, NULL,
+            NULL, NULL
+        );
         break;
     }
 

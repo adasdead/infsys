@@ -6,17 +6,21 @@
 #define UI_INIT_SUCCESS 0
 #define UI_INIT_FAILED  -1
 
-#define ui_label(win, txt, x, y)             \
-    ui_window_widget(win, (struct ui_widget)       \
+#define ui_label(win, txt, x, y)                    \
+    ui_window_widget(win, (struct ui_widget)        \
         { UI_LABEL, NULL, x, y, 100, 50, txt })
 
-#define ui_textbox(win, txt, x, y, w, h)           \
-    ui_window_widget(win, (struct ui_widget)       \
+#define ui_textbox(win, txt, x, y, w, h)            \
+    ui_window_widget(win, (struct ui_widget)        \
         { UI_TEXTBOX, NULL, x, y, w, h, txt })
+
+#define ui_separator(win, x, y, w)               \
+    ui_window_widget(win, (struct ui_widget)        \
+        { UI_SEPARATOR, NULL, x, y, w, 2, NULL })
 
 enum ui_widget_type
 {
-    UI_LABEL, UI_TEXTBOX
+    UI_LABEL, UI_TEXTBOX, UI_SEPARATOR
 };
 
 struct ui_widget
