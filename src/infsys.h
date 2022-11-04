@@ -41,9 +41,13 @@
 
 typedef char *string;
 
+#define s_strlen(str)                                   \
+    ((str) ? strnlen(str, 0) : 0)
+
 #define str_trimr(str)                                  \
     do {                                                \
-        string tmp = str + strlen(str);                 \
+        if (!str) break;                                \
+        string tmp = str + s_strlen(str);               \
         while (isspace(*--tmp));                        \
         tmp[1] = '\0';                                  \
     } while (0);

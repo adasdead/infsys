@@ -103,7 +103,7 @@ void ui_window_widget(struct ui_window *win, struct ui_widget widget)
     case UI_TEXTBOX:
         tmp = gtk_text_view_new();
         buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(tmp));
-        gtk_text_buffer_set_text(buf, widget.text, strlen(widget.text));
+        gtk_text_buffer_set_text(buf, widget.text, s_strlen(widget.text));
         gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(tmp), GTK_WRAP_CHAR);
         gtk_text_view_set_editable(GTK_TEXT_VIEW(tmp), 0);
         widget.x += WIDGET_X_OFFSET;

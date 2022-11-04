@@ -26,9 +26,9 @@ void cpu_identify(struct cpu_info *info)
 
     cpuid(0x0, 0, &regs);
 
-    memcpy(info->vendor + 0, bit_str(regs.ebx), 4);
-    memcpy(info->vendor + 4, bit_str(regs.edx), 4);
-    memcpy(info->vendor + 8, bit_str(regs.ecx), 4);
+    strncpy(info->vendor + 0, bit_str(regs.ebx), 4);
+    strncpy(info->vendor + 4, bit_str(regs.edx), 4);
+    strncpy(info->vendor + 8, bit_str(regs.ecx), 4);
 
     info->is_intel = (strstr(info->vendor, "Intel") != NULL);
 
@@ -135,10 +135,10 @@ void cpu_identify(struct cpu_info *info)
     {
         cpuid(i, 0, &regs);
 
-        memcpy(info->name + offset + 0,  bit_str(regs.eax), 4);
-        memcpy(info->name + offset + 4,  bit_str(regs.ebx), 4);
-        memcpy(info->name + offset + 8,  bit_str(regs.ecx), 4);
-        memcpy(info->name + offset + 12, bit_str(regs.edx), 4);
+        strncpy(info->name + offset + 0,  bit_str(regs.eax), 4);
+        strncpy(info->name + offset + 4,  bit_str(regs.ebx), 4);
+        strncpy(info->name + offset + 8,  bit_str(regs.ecx), 4);
+        strncpy(info->name + offset + 12, bit_str(regs.edx), 4);
 
         offset += 16;
     }
@@ -174,7 +174,7 @@ void cpu_features_str(const struct cpu_info *info,
             }
 
             const string feature = feature_names[i];
-            size_t feature_len = strlen(feature);
+            size_t feature_len = s_strlen(feature);
 
             size_t new_size = len + feature_len + 2;
 

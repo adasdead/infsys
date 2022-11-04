@@ -19,9 +19,9 @@ static int infsys_run(void)
     char family[3]   = {'\0'}, model[3] = {'\0'},
          stepping[3] = {'\0'};
     
-    sprintf(family, "%01X", (int) cpu.family);
-    sprintf(stepping, "%01X", (int) cpu.stepping);
-    sprintf(model, "%01X", (int) cpu.model);
+    snprintf(family, 3, "%01X", (int) cpu.family);
+    snprintf(stepping, 3, "%01X", (int) cpu.stepping);
+    snprintf(model, 3, "%01X", (int) cpu.model);
 
     ui_label(window, "Family", 44, 42);
     ui_textbox(window, family, 80, 40, 50, 17);
@@ -34,8 +34,8 @@ static int infsys_run(void)
 
     char cores[3] = {'\0'}, threads[3] = {'\0'};
 
-    sprintf(threads, "%d", (int) cpu.threads);
-    sprintf(cores, "%d", (int) cpu.cores);
+    snprintf(threads, 3, "%d", (int) cpu.threads);
+    snprintf(cores, 3, "%d", (int) cpu.cores);
 
     ui_textbox(window, cores, 395, 20, 25, 17);
     ui_textbox(window, threads, 425, 20, 25, 17);
@@ -51,7 +51,7 @@ static int infsys_run(void)
     for (int i = 0; i < 4; i++)
     {
         struct cpu_cache cache = cpu.caches[i];
-        sprintf(caches[i], "%d KB (%d-ways)",
+        snprintf(caches[i], 128, "%d KB (%d-ways)",
                 cache.size / SIZE_KB, cache.ways);
     }
 
