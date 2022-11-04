@@ -10,7 +10,7 @@ static int infsys_run(void)
 
     cpu_identify(&cpu);
 
-    str_trimr(cpu.name);
+    printf("%d\n", cpu.is_intel);
 
     window = ui_new_window(WINDOW_NAME, WINDOW_WIDTH,
                            WINDOW_HEIGHT);
@@ -42,13 +42,34 @@ static int infsys_run(void)
     ui_textbox(window, cores, 395, 20, 25, 17);
     ui_textbox(window, threads, 425, 20, 25, 17);
 
-    char features[512];
-    cpu_features_str(&cpu, features, 512);
+    char features[1024];
+    cpu_features_str(&cpu, features, 1024);
 
     ui_label(window, "Features", 32, 62);
     ui_textbox(window, features, 80, 60, 370, 80);
 
-    ui_separator(window, 35, 150, 418);
+    char caches[4][128];
+
+    for (int i = 0; i < 4; i++)
+    {
+        struct cpu_cache cache = cpu.caches[i];
+        sprintf(caches[i], "%d KB (%d-ways)",
+                cache.size / SIZE_KB, cache.ways);
+    }
+
+    ui_label(window, "L1D Cache", 20, 145);
+    ui_textbox(window, caches[CACHE_L1D], 80, 143, 140, 17);
+
+    ui_label(window, "L1I Cache", 255, 145);
+    ui_textbox(window, caches[CACHE_L1I], 310, 143, 140, 17);
+
+    ui_label(window, "L2 Cache", 28, 165);
+    ui_textbox(window, caches[CACHE_L2], 80, 163, 140, 17);
+
+    ui_label(window, "L3 Cache", 258, 165);
+    ui_textbox(window, caches[CACHE_L3], 310, 163, 140, 17);
+
+    ui_separator(window, 0, 200, 500);
 
     ui_window_open(window);
 

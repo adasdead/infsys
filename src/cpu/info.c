@@ -106,12 +106,12 @@ void cpu_identify(struct cpu_info *info)
 
     info->features[F_FSGSBASE] = bit(regs.ebx, 0);
     info->features[F_BMI1] = bit(regs.ebx, 3);
-    info->features[F_HLE] = info->cores && bit(regs.ebx, 4);
+    info->features[F_HLE] = info->is_intel && bit(regs.ebx, 4);
     info->features[F_AVX2] = bit(regs.ebx, 5);
     info->features[F_BMI2] = bit(regs.ebx, 8);
     info->features[F_ERMS] = bit(regs.ebx, 9);
     info->features[F_INVPCID] = bit(regs.ebx, 10);
-    info->features[F_RTM] = info->cores && bit(regs.ebx, 11);
+    info->features[F_RTM] = info->is_intel && bit(regs.ebx, 11);
     info->features[F_RDSEED] = bit(regs.ebx, 18);
     info->features[F_ADX] = bit(regs.ebx, 19);
     info->features[F_SHA] = bit(regs.ebx, 29);
@@ -119,17 +119,17 @@ void cpu_identify(struct cpu_info *info)
     cpuid(0x80000001, 0, &regs);
 
     info->features[F_LAHF] = bit(regs.ecx, 0);
-    info->features[F_LZCNT] = info->cores && bit(regs.ecx, 5);
-    info->features[F_ABM] = !info->cores && bit(regs.ecx, 5);
-    info->features[F_SSE4a] = !info->cores && bit(regs.ecx, 6);
-    info->features[F_XOP] = !info->cores && bit(regs.ecx, 11);
-    info->features[F_TBM] = !info->cores && bit(regs.ecx, 21);
+    info->features[F_LZCNT] = info->is_intel && bit(regs.ecx, 5);
+    info->features[F_ABM] = !info->is_intel && bit(regs.ecx, 5);
+    info->features[F_SSE4a] = !info->is_intel && bit(regs.ecx, 6);
+    info->features[F_XOP] = !info->is_intel && bit(regs.ecx, 11);
+    info->features[F_TBM] = !info->is_intel && bit(regs.ecx, 21);
 
-    info->features[F_TBM] = info->cores && bit(regs.edx, 11);
-    info->features[F_MMXEXT] = !info->cores && bit(regs.edx, 22);
-    info->features[F_RDTSCP] = info->cores && bit(regs.edx, 27);
-    info->features[F_3DNOWEXT] = !info->cores && bit(regs.edx, 30);
-    info->features[F_3DNOW] = !info->cores && bit(regs.edx, 31);
+    info->features[F_TBM] = info->is_intel && bit(regs.edx, 11);
+    info->features[F_MMXEXT] = !info->is_intel && bit(regs.edx, 22);
+    info->features[F_RDTSCP] = info->is_intel && bit(regs.edx, 27);
+    info->features[F_3DNOWEXT] = !info->is_intel && bit(regs.edx, 30);
+    info->features[F_3DNOW] = !info->is_intel && bit(regs.edx, 31);
 
     for (int i = 0x80000002, offset = 0; i <= 0x80000004; i++)
     {
@@ -142,6 +142,8 @@ void cpu_identify(struct cpu_info *info)
 
         offset += 16;
     }
+
+    str_trimr(info->name);
 
     cpu_cache_update(info->caches, info->is_intel);
 }

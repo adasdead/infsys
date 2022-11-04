@@ -10,7 +10,7 @@
 
 #define VERSION       "0.1"
 
-#define WINDOW_NAME   "InfSyS"
+#define WINDOW_NAME   "infsys"
 #define WINDOW_WIDTH  500
 #define WINDOW_HEIGHT 500
 
