@@ -10,8 +10,6 @@ static int infsys_run(void)
 
     cpu_identify(&cpu);
 
-    printf("%d\n", cpu.is_intel);
-
     window = ui_new_window(WINDOW_NAME, WINDOW_WIDTH,
                            WINDOW_HEIGHT);
 

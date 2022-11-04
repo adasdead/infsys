@@ -4,7 +4,10 @@
 
 #include <gtk/gtk.h>
 
-#define APPLICATION_ID "com.adasdead.infsys"
+#define APPLICATION_ID      "com.adasdead.infsys"
+
+#define WIDGET_FONT         "FreeSans 9"
+#define WIDGET_X_OFFSET     15
 
 struct ui_window
 {
@@ -16,11 +19,10 @@ struct ui_window
 
 static GtkApplication *g_app;
 
-static void ui_resize_font(enum ui_widget_type type,
-                           GtkWidget *widget)
+static void ui_resize_font(enum ui_widget_type type, GtkWidget *widget)
 {
     PangoFontDescription *desc;
-    desc = pango_font_description_from_string("Monospace 9");
+    desc = pango_font_description_from_string(WIDGET_FONT);
 
     G_GNUC_BEGIN_IGNORE_DEPRECATIONS
     gtk_widget_override_font(widget, desc);
@@ -34,8 +36,7 @@ static int ui_activate(GtkApplication *app, gpointer data)
     return ((ui_init_fn) data)();
 }
 
-static gboolean ui_window_deleted(GtkWidget *widget,
-                                  GdkEvent *event,
+static gboolean ui_window_deleted(GtkWidget *widget, GdkEvent *event,
                                   gpointer data)
 {
     struct ui_window *win = (struct ui_window*) data;
@@ -94,8 +95,9 @@ void ui_window_widget(struct ui_window *win, struct ui_widget widget)
     {
     case UI_LABEL:
         tmp = gtk_label_new(widget.text);
-        widget.x -= 45;
-        widget.y -= 17;
+        gtk_label_set_xalign(GTK_LABEL(tmp), 0.0);
+        widget.x += WIDGET_X_OFFSET - 7;
+        widget.y -= 19;
         break;
 
     case UI_TEXTBOX:
@@ -104,6 +106,7 @@ void ui_window_widget(struct ui_window *win, struct ui_widget widget)
         gtk_text_buffer_set_text(buf, widget.text, strlen(widget.text));
         gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(tmp), GTK_WRAP_CHAR);
         gtk_text_view_set_editable(GTK_TEXT_VIEW(tmp), 0);
+        widget.x += WIDGET_X_OFFSET;
         break;
 
     case UI_SEPARATOR:
