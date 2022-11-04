@@ -1,4 +1,4 @@
-add_executable(infsys)
+add_executable(infsys WIN32)
 
 target_include_directories(infsys
 	PRIVATE .

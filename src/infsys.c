@@ -74,7 +74,4 @@ static int infsys_run(void)
     return UI_INIT_SUCCESS;
 }
 
-int main(void)
-{
-    return ui_init(infsys_run);
-}
+INFSYS_MAIN_RUN(ui_init(infsys_run))

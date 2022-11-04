@@ -2,12 +2,6 @@
 
 #include "ui/ui.h"
 
-#ifndef UNICODE
-#define UNICODE
-#endif /* UNICODE */
-
-#include <windows.h>
-
 #define CLASS_NAME              L"__WinProc__"
 
 #define WIDGET_TEXT_BUF_SIZE    256
@@ -30,9 +24,9 @@ struct ui_window
     ui_close_fn close_fn;
 };
 
-static size_t created_windows = 0;
+static size_t win_created_windows = 0;
 
-static void register_class(WNDPROC proc, wstring name)
+static void win_register_class(WNDPROC proc, wstring name)
 {
     WNDCLASS wc = {0};
 
@@ -43,14 +37,14 @@ static void register_class(WNDPROC proc, wstring name)
     RegisterClass(&wc);
 }
 
-static void fix_fonts(HWND window)
+static void win_fix_fonts(HWND window)
 {
     WPARAM font = (WPARAM) GetStockObject(DEFAULT_GUI_FONT);
     SendMessage(window, WM_SETFONT, font, 1);
 }
 
-static LRESULT CALLBACK window_proc(HWND hwnd, UINT message,
-                                    WPARAM w_param, LPARAM l_param)
+static LRESULT CALLBACK ui_window_proc(HWND hwnd, UINT message,
+                                       WPARAM w_param, LPARAM l_param)
 {
     struct ui_window *window;
 
@@ -74,7 +68,7 @@ static LRESULT CALLBACK window_proc(HWND hwnd, UINT message,
         if (window->close_fn)
             window->close_fn(window);
         
-        if (!(--created_windows))
+        if (!(--win_created_windows))
             PostQuitMessage(0);
 
         return 0;
@@ -94,7 +88,7 @@ int ui_init(ui_init_fn fn)
 {
     MSG msg = {0};
 
-    register_class(window_proc, CLASS_NAME);
+    win_register_class(ui_window_proc, CLASS_NAME);
 
     if (fn() < 0) return 1;
 
@@ -125,7 +119,7 @@ struct ui_window *ui_new_window(const string name, uint32_t width,
     tmp->close_fn = NULL;
     tmp->hwnd = hwnd;
 
-    created_windows++;
+    win_created_windows++;
 
     return tmp;
 }
@@ -137,8 +131,8 @@ void ui_window_on_close(struct ui_window *win, ui_close_fn fn)
 
 void ui_window_widget(struct ui_window *win, struct ui_widget widget)
 {
-    wchar_t buffer[WIDGET_TEXT_BUF_SIZE];
     HWND hwnd;
+    wchar_t buffer[WIDGET_TEXT_BUF_SIZE];
 
     ascii_to_wide(buffer, widget.text, WIDGET_TEXT_BUF_SIZE);
 
@@ -147,8 +141,8 @@ void ui_window_widget(struct ui_window *win, struct ui_widget widget)
     case UI_LABEL:
         hwnd = CreateWindow(
             L"static", buffer, SS_EDITCONTROL | WS_CHILD | WS_VISIBLE,
-            widget.x, widget.y, widget.width, widget.height, win->hwnd, NULL,
-            NULL, NULL
+            widget.x, widget.y, widget.width, widget.height, win->hwnd,
+            NULL, NULL, NULL
         );
         break;
 
@@ -165,18 +159,18 @@ void ui_window_widget(struct ui_window *win, struct ui_widget widget)
     case UI_SEPARATOR:
         hwnd = CreateWindow(
             L"static", L"", SS_ETCHEDHORZ | WS_CHILD | WS_VISIBLE,
-            widget.x, widget.y, widget.width, widget.height, win->hwnd, NULL,
-            NULL, NULL
+            widget.x, widget.y, widget.width, widget.height, win->hwnd,
+            NULL, NULL, NULL
         );
         break;
     }
 
-    fix_fonts(hwnd);
+    win_fix_fonts(hwnd);
 }
 
 void ui_window_open(struct ui_window *win)
 {
-    ShowWindow(win->hwnd, 1);
+    ShowWindow(win->hwnd, SW_SHOWNORMAL);
 }
 
 #endif /* _WIN32 */
