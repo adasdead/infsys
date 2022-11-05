@@ -1,3 +1,5 @@
+find_package(OpenCL REQUIRED)
+
 add_executable(infsys WIN32)
 
 target_include_directories(infsys
@@ -8,6 +10,10 @@ target_sources(infsys
 	PRIVATE infsys.c
             cpu/info.c
             cpu/cache.c
+)
+
+target_link_libraries(infsys
+	PRIVATE OpenCL::OpenCL
 )
 
 if (WIN32)

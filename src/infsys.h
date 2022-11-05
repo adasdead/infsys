@@ -41,8 +41,7 @@
 
 typedef char *string;
 
-#define s_strlen(str)                                   \
-    ((str) ? strnlen(str, 0) : 0)
+#define s_strlen(str) ((str) ? strlen(str) : 0)
 
 #define str_trimr(str)                                  \
     do {                                                \

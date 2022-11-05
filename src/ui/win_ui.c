@@ -133,34 +133,43 @@ void ui_window_widget(struct ui_window *win, struct ui_widget widget)
 {
     HWND hwnd;
     wchar_t buffer[WIDGET_TEXT_BUF_SIZE];
+    long styles = WS_CHILD | WS_VISIBLE;
 
     ascii_to_wide(buffer, widget.text, WIDGET_TEXT_BUF_SIZE);
 
     switch (widget.type)
     {
     case UI_LABEL:
+        styles |= SS_EDITCONTROL;
+
         hwnd = CreateWindow(
-            L"static", buffer, SS_EDITCONTROL | WS_CHILD | WS_VISIBLE,
-            widget.x, widget.y, widget.width, widget.height, win->hwnd,
-            NULL, NULL, NULL
+            L"static", buffer, styles, widget.x, widget.y, widget.width,
+            widget.height, win->hwnd, NULL, NULL, NULL
         );
         break;
 
     case UI_TEXTBOX:
+        styles |= WS_BORDER | ES_READONLY | ES_MULTILINE;
+
+        if (widget.next)
+        {
+            if (widget.next->is_center) styles |= ES_CENTER;
+        }
+
         hwnd = CreateWindow(
-            L"edit", L"", WS_BORDER | WS_CHILD | WS_VISIBLE | ES_READONLY
-            | ES_MULTILINE, widget.x, widget.y, widget.width, widget.height,
-            win->hwnd, NULL, NULL, NULL
+            L"edit", L"", styles, widget.x, widget.y, widget.width,
+            widget.height, win->hwnd, NULL, NULL, NULL
         );
 
         SetWindowTextW(hwnd, buffer);
         break;
     
     case UI_SEPARATOR:
+        styles |= SS_ETCHEDHORZ;
+
         hwnd = CreateWindow(
-            L"static", L"", SS_ETCHEDHORZ | WS_CHILD | WS_VISIBLE,
-            widget.x, widget.y, widget.width, widget.height, win->hwnd,
-            NULL, NULL, NULL
+            L"static", L"", styles, widget.x, widget.y, widget.width,
+            widget.height, win->hwnd, NULL, NULL, NULL
         );
         break;
     }

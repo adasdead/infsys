@@ -5,8 +5,8 @@
 
 #include "cpu/cache.h"
 
-#define CPU_INFO_NAME_LEN    64 + 1
-#define CPU_INFO_VENDOR_LEN  12 + 1
+#define CPU_NAME_SIZE    64 + 1
+#define CPU_VENDOR_SIZE  12 + 1
 
 enum cpu_features
 {
@@ -23,8 +23,8 @@ enum cpu_features
 
 struct cpu_info
 {
-    char name[CPU_INFO_NAME_LEN];
-    char vendor[CPU_INFO_VENDOR_LEN];
+    char name[CPU_NAME_SIZE];
+    char vendor[CPU_VENDOR_SIZE];
 
     struct cpu_cache caches[4];
 

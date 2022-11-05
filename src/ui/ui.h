@@ -14,7 +14,11 @@
     ui_window_widget(win, (struct ui_widget)        \
         { UI_TEXTBOX, NULL, x, y, w, h, txt })
 
-#define ui_separator(win, x, y, w)               \
+#define ui_textbox_n(win, txt, x, y, w, h, nxt)     \
+    ui_window_widget(win, (struct ui_widget)        \
+        { UI_TEXTBOX, &nxt, x, y, w, h, txt })
+
+#define ui_separator(win, x, y, w)                  \
     ui_window_widget(win, (struct ui_widget)        \
         { UI_SEPARATOR, NULL, x, y, w, 2, NULL })
 
@@ -23,10 +27,15 @@ enum ui_widget_type
     UI_LABEL, UI_TEXTBOX, UI_SEPARATOR
 };
 
+struct ui_widget_next
+{
+    bool is_center;
+};
+
 struct ui_widget
 {
     enum ui_widget_type type;
-    const void *next;
+    const struct ui_widget_next *next;
 
     uint32_t x, y;
     uint32_t width, height;
