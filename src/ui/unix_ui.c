@@ -106,6 +106,16 @@ void ui_window_widget(struct ui_window *win, struct ui_widget widget)
         gtk_text_buffer_set_text(buf, widget.text, s_strlen(widget.text));
         gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(tmp), GTK_WRAP_CHAR);
         gtk_text_view_set_editable(GTK_TEXT_VIEW(tmp), 0);
+        
+        if (widget.next)
+        {
+            if (widget.next->is_center)
+            {
+                gtk_text_view_set_justification(GTK_TEXT_VIEW(tmp),
+                                                GTK_JUSTIFY_CENTER);
+            }
+        }
+        
         widget.x += WIDGET_X_OFFSET;
         break;
 
