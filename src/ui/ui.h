@@ -8,19 +8,17 @@
 
 #define ui_label(win, txt, x, y)                    \
     ui_window_widget(win, (struct ui_widget)        \
-        { UI_LABEL, NULL, x, y, 100, 50, txt })
+        { UI_LABEL, NULL, x, y, 60, 50, txt })
 
-#define ui_textbox(win, txt, x, y, w, h)            \
+#define ui_textbox(win, txt, x, y, w, h, nxt)       \
     ui_window_widget(win, (struct ui_widget)        \
-        { UI_TEXTBOX, NULL, x, y, w, h, txt })
-
-#define ui_textbox_n(win, txt, x, y, w, h, nxt)     \
-    ui_window_widget(win, (struct ui_widget)        \
-        { UI_TEXTBOX, &nxt, x, y, w, h, txt })
+        { UI_TEXTBOX, nxt, x, y, w, h, txt })
 
 #define ui_separator(win, x, y, w)                  \
     ui_window_widget(win, (struct ui_widget)        \
         { UI_SEPARATOR, NULL, x, y, w, 2, NULL })
+
+#define ui_center   &__ui_center
 
 enum ui_widget_type
 {
@@ -47,6 +45,10 @@ struct ui_window;
 
 typedef void (*ui_close_fn)(struct ui_window*);
 typedef int (*ui_init_fn)(void);
+
+static struct ui_widget_next __ui_center = {
+    .is_center = 1
+};
 
 int ui_init(ui_init_fn fn);
 

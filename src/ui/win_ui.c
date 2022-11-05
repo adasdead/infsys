@@ -140,7 +140,7 @@ void ui_window_widget(struct ui_window *win, struct ui_widget widget)
     switch (widget.type)
     {
     case UI_LABEL:
-        styles |= SS_EDITCONTROL;
+        styles |= SS_EDITCONTROL | SS_RIGHT;
 
         hwnd = CreateWindow(
             L"static", buffer, styles, widget.x, widget.y, widget.width,
