@@ -95,9 +95,8 @@ void ui_window_widget(struct ui_window *win, struct ui_widget widget)
     {
     case UI_LABEL:
         tmp = gtk_label_new(widget.text);
-        gtk_label_set_xalign(GTK_LABEL(tmp), 0.0);
-        widget.x += WIDGET_X_OFFSET - 7;
-        widget.y -= 19;
+        gtk_label_set_xalign(GTK_LABEL(tmp), 1.0);
+        widget.x += WIDGET_X_OFFSET;
         break;
 
     case UI_TEXTBOX:
