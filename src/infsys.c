@@ -1,28 +1,9 @@
-#define CL_TARGET_OPENCL_VERSION 220
-
-#include <CL/cl.h>
-
 #include "infsys.h"
 
 #include "ui/ui.h"
 #include "cpu/info.h"
 
-static void cl_gpu_get_name(char *name_out, size_t size)
-{
-    cl_platform_id platform_id = NULL;
-    cl_device_id device = NULL;   
-
-    cl_int ret = clGetPlatformIDs(1, &platform_id, NULL);
-    
-    ret = clGetDeviceIDs(platform_id, CL_DEVICE_TYPE_GPU, 1, 
-            &device, NULL);
-
-    if (ret == CL_SUCCESS)
-    {
-        clGetDeviceInfo(device, CL_DEVICE_NAME, size,
-                        name_out, NULL);
-    }
-}
+#include "other/gpu.h"
 
 static int infsys_run(void)
 {
@@ -90,11 +71,15 @@ static int infsys_run(void)
 
     ui_separator(window, 0, 200, 500);
 
-    char gpu_name[64];
-    cl_gpu_get_name(gpu_name, 64);
+    struct gpu_info gpu_info;
+    
+    gpu_identify(&gpu_info);
 
     ui_label(window, "GPU", 15, 221);
-    ui_textbox(window, gpu_name, 80, 220, 370, 17, ui_center);
+    ui_textbox(window, gpu_info.name, 80, 220, 370, 17, ui_center);
+
+    ui_label(window, "GPU Vendor", 15, 241);
+    ui_textbox(window, gpu_info.vendor, 80, 240, 370, 17, ui_center);
 
     ui_window_open(window);
 

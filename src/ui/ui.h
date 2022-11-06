@@ -8,7 +8,7 @@
 
 #define ui_label(win, txt, x, y)                    \
     ui_window_widget(win, (struct ui_widget)        \
-        { UI_LABEL, NULL, x, y, 60, 10, txt })
+        { UI_LABEL, NULL, x, y, 60, 15, txt })
 
 #define ui_textbox(win, txt, x, y, w, h, nxt)       \
     ui_window_widget(win, (struct ui_widget)        \
