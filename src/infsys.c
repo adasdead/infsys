@@ -3,6 +3,7 @@
 #include "ui/ui.h"
 
 #include "hardware/cpu/info.h"
+#include "hardware/bios.h"
 #include "hardware/gpu.h"
 
 static void add_cpu_section(struct ui_window *window)
@@ -68,6 +69,7 @@ static void add_cpu_section(struct ui_window *window)
 
 static void add_other_section(struct ui_window *window)
 {
+    struct bios_info bios_info;
     struct gpu_info gpu_info;
     
     gpu_identify(&gpu_info);
@@ -77,6 +79,11 @@ static void add_other_section(struct ui_window *window)
 
     ui_label(window, "GPU Vendor", 15, 241);
     ui_textbox(window, gpu_info.vendor, 80, 240, 370, 17, ui_center);
+
+    bios_identify(&bios_info);
+
+    ui_label(window, "BIOS", 15, 262);
+    ui_textbox(window, bios_info.vendor, 80, 260, 370, 17, ui_center);
 }
 
 static int infsys_run(void)

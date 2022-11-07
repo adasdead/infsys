@@ -18,7 +18,7 @@
 
 #endif /* _WIN32 */
 
-#if _WIN32
+#if _WIN32 && !_DEBUG
 #define INFSYS_MAIN_RUN(func)                           \
     int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev,  \
                        PSTR line, int show)             \

@@ -1,6 +1,6 @@
 find_package(OpenCL REQUIRED)
 
-add_executable(infsys WIN32)
+add_executable(infsys)
 
 target_include_directories(infsys
 	PRIVATE .
@@ -8,6 +8,7 @@ target_include_directories(infsys
 
 target_sources(infsys
 	PRIVATE infsys.c
+			hardware/bios.c
             hardware/cpu/info.c
             hardware/cpu/cache.c
 )
