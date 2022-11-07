@@ -1,7 +1,7 @@
-#include "cpu/cache.h"
+#include "hardware/cpu/cache.h"
 
-#include "cpu/cpuid.h"
-#include "cpu/info.h"
+#include "hardware/cpu/cpuid.h"
+#include "hardware/cpu/info.h"
 
 void cpu_cache_update(struct cpu_cache caches[4], bool intel)
 {

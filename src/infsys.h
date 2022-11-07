@@ -16,20 +16,23 @@
 
 #include <windows.h>
 
+#endif /* _WIN32 */
+
+#if _WIN32
 #define INFSYS_MAIN_RUN(func)                           \
     int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev,  \
                        PSTR line, int show)             \
     {                                                   \
         return func;                                    \
     }
-#else
+#else /* _WIN32 */
 #define INFSYS_MAIN_RUN(func)                           \
     int main(void)                                      \
     {                                                   \
         return func;                                    \
     }
 
-#endif /* _WIN32 */
+#endif
 
 #define VERSION       "0.1"
 

@@ -1,5 +1,5 @@
-#ifndef CPU_CPUID_H
-#define CPU_CPUID_H
+#ifndef HARDWARE_CPU_CPUID_H
+#define HARDWARE_CPU_CPUID_H
 
 #include "infsys.h"
 
@@ -25,4 +25,4 @@ static void cpuid(uint32_t lvl, uint32_t cnt,
 #endif /* _WIN32 */
 }
 
-#endif /* CPU_CPUID_H */
+#endif /* HARDWARE_CPU_CPUID_H */

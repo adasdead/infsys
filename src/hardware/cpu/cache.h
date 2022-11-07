@@ -1,5 +1,5 @@
-#ifndef CPU_CACHE_H
-#define CPU_CACHE_H
+#ifndef HARDWARE_CPU_CACHE_H
+#define HARDWARE_CPU_CACHE_H
 
 #include "infsys.h"
 
@@ -22,4 +22,4 @@ struct cpu_cache
 
 void cpu_cache_update(struct cpu_cache caches[4], bool intel);
 
-#endif /* CPU_CACHE_H */
+#endif /* HARDWARE_CPU_CACHE_H */

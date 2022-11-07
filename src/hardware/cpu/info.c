@@ -1,14 +1,14 @@
-#include "cpu/info.h"
+#include "hardware/cpu/info.h"
 
-#include "cpu/cache.h"
-#include "cpu/cpuid.h"
+#include "hardware/cpu/cache.h"
+#include "hardware/cpu/cpuid.h"
 
 #define BUFFER_SIZE 250
 
 #define bit(num, n) (((num) >> (n)) & 1)
 #define bit_str(num) (const string) (&num)
 
-static const string feature_names[F_TOTAL] = {
+static const string _feature_names[F_TOTAL] = {
     "3DNow!", "3DNow!(+)", "ABM", "ADX", "AES", "AVX", "AVX2",
     "BMI1", "BMI2", "CLFSH", "CMPXCHG16B", "CX8", "CMOV", "ERMS",
     "F16C", "FMA", "FSGSBASE", "FXSR", "HLE", "HTT", "INVPCID",
@@ -173,7 +173,7 @@ void cpu_features_str(const struct cpu_info *info,
                 break;
             }
 
-            const string feature = feature_names[i];
+            const string feature = _feature_names[i];
             size_t feature_len = s_strlen(feature);
 
             size_t new_size = len + feature_len + 2;

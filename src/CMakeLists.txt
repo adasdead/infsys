@@ -8,8 +8,8 @@ target_include_directories(infsys
 
 target_sources(infsys
 	PRIVATE infsys.c
-            cpu/info.c
-            cpu/cache.c
+            hardware/cpu/info.c
+            hardware/cpu/cache.c
 )
 
 target_link_libraries(infsys
@@ -20,7 +20,7 @@ if (WIN32)
     target_sources(infsys
     		PRIVATE ui/win_ui.c
     )
-else()
+else ()
     find_package(PkgConfig REQUIRED)
 
 	pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
@@ -40,4 +40,4 @@ else()
 	target_sources(infsys
 		PRIVATE ui/unix_ui.c
     )
-endif()
+endif ()

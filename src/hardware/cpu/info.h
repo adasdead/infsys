@@ -1,9 +1,9 @@
-#ifndef CPU_INFO_H
-#define CPU_INFO_H
+#ifndef HARDWARE_CPU_INFO_H
+#define HARDWARE_CPU_INFO_H
 
 #include "infsys.h"
 
-#include "cpu/cache.h"
+#include "hardware/cpu/cache.h"
 
 #define CPU_NAME_SIZE    64 + 1
 #define CPU_VENDOR_SIZE  12 + 1
@@ -42,4 +42,4 @@ void cpu_identify(struct cpu_info *info);
 void cpu_features_str(const struct cpu_info *info,
                       string dest, size_t size);
 
-#endif /* CPU_INFO_H */
+#endif /* HARDWARE_CPU_INFO_H */

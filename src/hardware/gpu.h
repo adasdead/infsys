@@ -1,5 +1,5 @@
-#ifndef OTHER_GPU_H
-#define OTHER_GPU_H
+#ifndef HARDWARE_GPU_H
+#define HARDWARE_GPU_H
 
 #define CL_TARGET_OPENCL_VERSION 220
 
@@ -7,10 +7,13 @@
 
 #include "infsys.h"
 
+#define GPU_NAME_SIZE   128
+#define GPU_VENDOR_SIZE 64
+
 struct gpu_info
 {
-    char name[128];
-    char vendor[64];
+    char name[GPU_NAME_SIZE];
+    char vendor[GPU_VENDOR_SIZE];
 };
 
 static void gpu_identify(struct gpu_info *info)
@@ -25,12 +28,12 @@ static void gpu_identify(struct gpu_info *info)
 
     if (ret == CL_SUCCESS)
     {
-        clGetDeviceInfo(device, CL_DEVICE_NAME, 128,
+        clGetDeviceInfo(device, CL_DEVICE_NAME, GPU_NAME_SIZE,
                         info->name, NULL);
         
-        clGetDeviceInfo(device, CL_DEVICE_VENDOR, 64,
+        clGetDeviceInfo(device, CL_DEVICE_VENDOR, GPU_VENDOR_SIZE,
                         info->vendor, NULL);
     }
 }
 
-#endif /* OTHER_GPU_H */
+#endif /* HARDWARE_GPU_H */

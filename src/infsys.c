@@ -1,19 +1,15 @@
 #include "infsys.h"
 
 #include "ui/ui.h"
-#include "cpu/info.h"
 
-#include "other/gpu.h"
+#include "hardware/cpu/info.h"
+#include "hardware/gpu.h"
 
-static int infsys_run(void)
+static void add_cpu_section(struct ui_window *window)
 {
-    struct ui_window *window;
     struct cpu_info cpu;
 
     cpu_identify(&cpu);
-
-    window = ui_new_window(WINDOW_NAME, WINDOW_WIDTH,
-                           WINDOW_HEIGHT);
 
     ui_label(window, "Name", 15, 22);
     ui_textbox(window, cpu.name, 80, 20, 310, 17, ui_center);
@@ -68,9 +64,10 @@ static int infsys_run(void)
 
     ui_label(window, "L3 Cache", 245, 165);
     ui_textbox(window, caches[CACHE_L3], 310, 163, 140, 17, NULL);
+}
 
-    ui_separator(window, 0, 200, 500);
-
+static void add_other_section(struct ui_window *window)
+{
     struct gpu_info gpu_info;
     
     gpu_identify(&gpu_info);
@@ -80,7 +77,18 @@ static int infsys_run(void)
 
     ui_label(window, "GPU Vendor", 15, 241);
     ui_textbox(window, gpu_info.vendor, 80, 240, 370, 17, ui_center);
+}
 
+static int infsys_run(void)
+{
+    struct ui_window *window;
+
+    window = ui_new_window(WINDOW_NAME, WINDOW_WIDTH,
+                           WINDOW_HEIGHT);
+
+    add_cpu_section(window);
+    ui_separator(window, 0, 200, 500);
+    add_other_section(window);
     ui_window_open(window);
 
     return UI_INIT_SUCCESS;
