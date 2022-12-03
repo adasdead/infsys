@@ -18,7 +18,8 @@
     ui_window_widget(win, (struct ui_widget)        \
         { UI_SEPARATOR, NULL, x, y, w, 2, NULL })
 
-#define ui_center   &__ui_center
+#define UI_CENTER       &__ui_center
+#define UI_DEFAULT      NULL
 
 enum ui_widget_type
 {

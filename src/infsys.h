@@ -18,6 +18,14 @@
 
 #endif /* _WIN32 */
 
+#define VERSION             "0.1"
+
+#define WINDOW_NAME         "infsys"
+#define WINDOW_WIDTH        500
+#define WINDOW_HEIGHT       275
+
+#define SIZE_KB             1024
+
 #if _WIN32
 #define INFSYS_MAIN_RUN(func)                           \
     int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev,  \
@@ -34,18 +42,6 @@
 
 #endif
 
-#define VERSION       "0.1"
-
-#define WINDOW_NAME   "infsys"
-#define WINDOW_WIDTH  500
-#define WINDOW_HEIGHT 500
-
-#define SIZE_KB       1024
-
-typedef char *string;
-
-#define s_strlen(str) ((str) ? strlen(str) : 0)
-
 #define str_trimr(str)                                  \
     do {                                                \
         if (!str) break;                                \
@@ -53,5 +49,9 @@ typedef char *string;
         while (isspace(*--tmp));                        \
         tmp[1] = '\0';                                  \
     } while (0);
+
+#define s_strlen(str) ((str) ? strlen(str) : 0)
+
+typedef char *string;
 
 #endif /* INFSYS_H */
